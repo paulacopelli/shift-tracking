@@ -1,0 +1,170 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Calculadora personal de turnos, horas semanales y balance mensual.">
+  <meta name="theme-color" content="#1d2925">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icon.svg" type="image/svg+xml">
+  <title>Turnario · Control de horas</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="shell">
+    <header class="topbar">
+      <a class="brand" href="#" aria-label="Turnario, inicio">
+        <span class="brand-mark">T</span>
+        <span>turnario<span class="brand-dot">.</span></span>
+      </a>
+      <div class="topbar-actions">
+        <button class="button button-ghost" id="import-button" type="button">Importar mes</button>
+        <button class="button button-dark" id="export-button" type="button">Exportar <span class="desktop-only">mes</span> <span aria-hidden="true">↓</span></button>
+        <input id="import-input" type="file" accept=".json,application/json" hidden>
+      </div>
+    </header>
+
+    <main>
+      <section class="hero">
+        <div>
+          <p class="eyebrow">Panel de control</p>
+          <h1>Tu tiempo,<br><em>bajo control.</em></h1>
+          <p class="intro">Registra cada turno y conoce en segundos si tu semana está en regla.</p>
+        </div>
+        <div class="month-picker">
+          <button class="icon-button" id="previous-month" aria-label="Mes anterior">←</button>
+          <div>
+            <span class="picker-label">PERÍODO ACTIVO</span>
+            <strong id="month-label">—</strong>
+          </div>
+          <button class="icon-button" id="next-month" aria-label="Mes siguiente">→</button>
+        </div>
+      </section>
+
+      <section class="backup-reminder" id="backup-reminder" hidden>
+        <div class="reminder-icon">↓</div>
+        <div>
+          <strong>Tu mes está por cerrar</strong>
+          <p>Descarga una copia de tus registros para conservarlos y subirlos a tu repositorio privado.</p>
+        </div>
+        <div class="reminder-actions">
+          <button class="button button-accent" id="reminder-export" type="button">Exportar ahora</button>
+          <button class="reminder-dismiss" id="reminder-dismiss" type="button">Recordarme después</button>
+        </div>
+      </section>
+
+      <section class="stats-grid" aria-label="Resumen del período">
+        <article class="stat-card stat-card-primary">
+          <div class="stat-icon">◷</div>
+          <p>Horas trabajadas</p>
+          <strong id="worked-hours">00:00</strong>
+          <span id="worked-caption">sobre 00:00 esperadas</span>
+        </article>
+        <article class="stat-card">
+          <div class="stat-icon muted">◎</div>
+          <p>Balance mensual</p>
+          <strong id="monthly-balance">00:00</strong>
+          <span id="balance-caption">sin registros todavía</span>
+        </article>
+        <article class="stat-card">
+          <div class="stat-icon muted">↗</div>
+          <p>Horas extra</p>
+          <strong id="overtime-hours">00:00</strong>
+          <span>No remuneradas</span>
+        </article>
+        <article class="stat-card stat-card-warning">
+          <div class="stat-icon">!</div>
+          <p>Descuento estimado</p>
+          <strong id="deduction-days">0 días</strong>
+          <span id="deduction-caption">a partir de 59 min faltantes</span>
+        </article>
+      </section>
+
+      <section class="content-grid">
+        <div class="panel calendar-panel">
+          <div class="panel-heading">
+            <div>
+              <p class="eyebrow">Registro diario</p>
+              <h2>Mis turnos</h2>
+            </div>
+            <button class="button button-accent" id="today-button" type="button">Ir a hoy</button>
+          </div>
+          <div class="weekdays" aria-hidden="true">
+            <span>LUN</span><span>MAR</span><span>MIÉ</span><span>JUE</span><span>VIE</span><span>SÁB</span><span>DOM</span>
+          </div>
+          <div id="calendar" class="calendar" aria-label="Calendario mensual"></div>
+          <div class="legend">
+            <span><i class="legend-dot complete"></i>Completo</span>
+            <span><i class="legend-dot short"></i>Faltan horas</span>
+            <span><i class="legend-dot empty"></i>Sin registrar</span>
+          </div>
+        </div>
+
+        <aside class="panel week-panel">
+          <div class="panel-heading">
+            <div>
+              <p class="eyebrow">Seguimiento</p>
+              <h2>Esta semana</h2>
+            </div>
+            <span class="status-pill" id="week-status">Pendiente</span>
+          </div>
+          <div class="week-total"><strong id="week-worked">00:00</strong><span>/ 44:00 hs</span></div>
+          <div class="progress-track"><div class="progress-bar" id="week-progress"></div></div>
+          <p class="helper" id="week-helper">Registra tus turnos para ver el balance.</p>
+          <div class="week-days" id="week-days"></div>
+          <div class="rule-note">
+            <span>i</span>
+            <p><strong>Regla semanal</strong><br>44 horas de lunes a domingo. Las horas extra no se pagan.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="panel history-panel">
+        <div class="panel-heading">
+          <div>
+            <p class="eyebrow">Detalle</p>
+            <h2>Resumen de semanas</h2>
+          </div>
+          <span class="month-code" id="month-code">—</span>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Semana</th><th>Período</th><th>Trabajadas</th><th>Balance</th><th>Estado</th></tr></thead>
+            <tbody id="weeks-table"></tbody>
+          </table>
+        </div>
+      </section>
+    </main>
+    <footer><span>Los datos se guardan en este dispositivo.</span><span>Exporta el mes para versionarlo en GitHub.</span></footer>
+  </div>
+
+  <dialog id="shift-dialog">
+    <form method="dialog" id="shift-form">
+      <button class="dialog-close" value="cancel" aria-label="Cerrar">×</button>
+      <p class="eyebrow">Editar jornada</p>
+      <h2 id="dialog-date">—</h2>
+      <p class="dialog-note" id="dialog-schedule">Jornada sugerida: 09:00 — 18:00</p>
+      <input id="dialog-date-value" type="hidden">
+      <div class="form-grid">
+        <label>Ingreso<input id="start-time" type="time" required></label>
+        <label>Salida<input id="end-time" type="time" required></label>
+      </div>
+      <label class="checkbox-label"><input id="day-off" type="checkbox"> Día libre / no trabajé</label>
+      <div class="dialog-actions">
+        <button class="button button-ghost" id="clear-shift" type="button">Borrar registro</button>
+        <button class="button button-dark" value="save" type="submit">Guardar turno</button>
+      </div>
+    </form>
+  </dialog>
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+  <script src="app.js"></script>
+  <script>
+    if ("serviceWorker" in navigator && location.protocol !== "file:") {
+      navigator.serviceWorker.register("service-worker.js").catch(() => {});
+    }
+  </script>
+</body>
+</html>
