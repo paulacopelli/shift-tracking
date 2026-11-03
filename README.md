@@ -11,7 +11,10 @@ Calculadora web estática para registrar turnos y controlar el cumplimiento de u
 - Registro de comisión de servicio: el día se considera cubierto, pero no se contabiliza como horas efectivamente trabajadas.
 - Registro de salida anticipada autorizada, que completa la jornada esperada sin generar descuento.
 - Registro manual de feriados, que completa la jornada esperada sin sumar horas trabajadas ni generar descuento.
+- Botón para agregar un día online, que completa la jornada esperada aunque no exista marcación.
 - Balance semanal y mensual, horas extra no remuneradas y alerta de descuento desde 59 minutos faltantes.
+- El resumen mensual sólo incluye fechas del mes seleccionado; el resumen semanal conserva la semana completa aunque cruce de mes.
+- El descuento estimado muestra los minutos faltantes de las jornadas con 59 minutos o más de déficit.
 - Persistencia automática en `localStorage` del navegador.
 - Exportación mensual en `JSON` (para versionar en GitHub) y `CSV` (compatible con Excel).
 - Importación de un JSON previamente exportado para continuar el registro en otro dispositivo.

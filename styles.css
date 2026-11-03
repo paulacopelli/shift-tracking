@@ -52,6 +52,7 @@ h1 em { color: var(--accent-dark); font-style: normal; }
 .content-grid { display: grid; grid-template-columns: 1.48fr 1fr; gap: 15px; margin-bottom: 15px; }
 .panel { background: var(--white); border: 1px solid var(--line); border-radius: 10px; padding: 26px; }
 .panel-heading { display: flex; align-items: start; justify-content: space-between; gap: 15px; }
+.panel-actions { display: flex; gap: 8px; }
 h2 { margin: 0; font-size: 21px; letter-spacing: -1px; }
 .calendar-panel { padding-bottom: 19px; }
 .weekdays, .calendar { display: grid; grid-template-columns: repeat(7, 1fr); gap: 7px; }
