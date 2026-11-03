@@ -18,7 +18,7 @@ function shiftMinutes(shift) { if (!shift || shift.off || shift.commission || sh
 function creditedMinutes(date, shift) {
   const expected = expectedForDate(date);
   if (!shift) return 0;
-  if (shift.off || shift.commission || shift.leave === "full") return expected;
+  if (shift.off || shift.commission || shift.leave === "full" || shift.authorizedEarlyDeparture) return expected;
   if (shift.leave === "morning" || shift.leave === "afternoon") return Math.floor(expected / 2);
   return shiftMinutes(shift);
 }
@@ -28,6 +28,7 @@ function statusLabel(date, shift, minutes) {
   if (shift.commission) return "COMISIÓN";
   if (shift.leave === "full") return "LICENCIA";
   if (shift.leave) return "MEDIA JORNADA";
+  if (shift.authorizedEarlyDeparture) return "SALIDA AUTORIZADA";
   return formatMinutes(minutes);
 }
 function monthDates() { const first = new Date(activeMonth.getFullYear(), activeMonth.getMonth(), 1); const count = new Date(activeMonth.getFullYear(), activeMonth.getMonth() + 1, 0).getDate(); return Array.from({ length: count }, (_, index) => new Date(first.getFullYear(), first.getMonth(), index + 1)); }
@@ -79,12 +80,12 @@ function renderWeeksTable() {
 function openDialog(date) {
   selectedDate = date; const key = dateKey(date); const shift = shifts[key]; const expected = expectedForDate(date); $("dialog-date").textContent = formatLongDate(date); $("dialog-date-value").value = key;
   $("dialog-schedule").textContent = expected ? `Jornada sugerida: ${DEFAULT_START} — ${expected === 540 ? "18:00" : "17:00"}` : "Fin de semana · sin jornada esperada";
-  $("start-time").value = shift?.start || DEFAULT_START; $("end-time").value = shift?.end || (expected === 540 ? "18:00" : expected === 480 ? "17:00" : "18:00"); $("leave-type").value = shift?.leave || (shift?.off ? "full" : ""); $("commission").checked = Boolean(shift?.commission); $("shift-dialog").showModal();
+  $("start-time").value = shift?.start || DEFAULT_START; $("end-time").value = shift?.end || (expected === 540 ? "18:00" : expected === 480 ? "17:00" : "18:00"); $("leave-type").value = shift?.leave || (shift?.off ? "full" : ""); $("commission").checked = Boolean(shift?.commission); $("authorized-early-departure").checked = Boolean(shift?.authorizedEarlyDeparture); $("shift-dialog").showModal();
 }
 function exportMonth() {
   const payload = { month: `${activeMonth.getFullYear()}-${pad(activeMonth.getMonth() + 1)}`, exportedAt: new Date().toISOString(), weeklyTargetMinutes: WORK_WEEK, shifts: monthDates().filter((date) => shifts[dateKey(date)]).map((date) => ({ date: dateKey(date), ...shifts[dateKey(date)] })) };
   const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" }); const link = document.createElement("a"); link.href = URL.createObjectURL(blob); link.download = `turnario-${payload.month}.json`; link.click(); URL.revokeObjectURL(link.href);
-  const csv = ["Fecha,Ingreso,Salida,Horas,Estado", ...payload.shifts.map((shift) => `${shift.date},${shift.commission || shift.leave ? "" : shift.start},${shift.commission || shift.leave ? "" : shift.end},${formatMinutes(shiftMinutes(shift))},${shift.commission ? "Comisión de servicio" : shift.leave ? `Licencia ${shift.leave}` : "Trabajado"}`)].join("\n"); const csvLink = document.createElement("a"); csvLink.href = URL.createObjectURL(new Blob(["\ufeff" + csv], { type: "text/csv;charset=utf-8" })); csvLink.download = `turnario-${payload.month}.csv`; csvLink.click(); URL.revokeObjectURL(csvLink.href); showToast("Mes exportado en JSON y CSV");
+  const csv = ["Fecha,Ingreso,Salida,Horas,Estado,Observaciones", ...payload.shifts.map((shift) => `${shift.date},${shift.commission || shift.leave ? "" : shift.start},${shift.commission || shift.leave ? "" : shift.end},${formatMinutes(shiftMinutes(shift))},${shift.commission ? "Comisión de servicio" : shift.leave ? `Licencia ${shift.leave}` : shift.authorizedEarlyDeparture ? "Salida anticipada autorizada" : "Trabajado"},"${(shift.note || "").replaceAll('"', '""')}"`)].join("\n"); const csvLink = document.createElement("a"); csvLink.href = URL.createObjectURL(new Blob(["\ufeff" + csv], { type: "text/csv;charset=utf-8" })); csvLink.download = `turnario-${payload.month}.csv`; csvLink.click(); URL.revokeObjectURL(csvLink.href); showToast("Mes exportado en JSON y CSV");
   localStorage.setItem(`turnario-exported-${payload.month}`, "true"); renderBackupReminder();
 }
 function showToast(message) { const toast = $("toast"); toast.textContent = message; toast.classList.add("show"); setTimeout(() => toast.classList.remove("show"), 2600); }
@@ -93,7 +94,7 @@ $("next-month").addEventListener("click", () => { activeMonth = new Date(activeM
 $("today-button").addEventListener("click", () => { activeMonth = new Date(new Date().getFullYear(), new Date().getMonth(), 1); render(); });
 $("export-button").addEventListener("click", exportMonth); $("import-button").addEventListener("click", () => $("import-input").click());
 $("reminder-export").addEventListener("click", exportMonth); $("reminder-dismiss").addEventListener("click", () => { localStorage.setItem(`turnario-reminder-dismissed-${monthCode(activeMonth)}`, "true"); $("backup-reminder").hidden = true; });
-$("import-input").addEventListener("change", (event) => { const file = event.target.files[0]; if (!file) return; const reader = new FileReader(); reader.onload = () => { try { const data = JSON.parse(reader.result); (data.shifts || []).forEach((shift) => { shifts[shift.date] = { start: shift.start, end: shift.end, off: shift.off }; }); saveShifts(); render(); showToast("Registros importados correctamente"); } catch { showToast("No se pudo leer el archivo"); } }; reader.readAsText(file); event.target.value = ""; });
-$("shift-form").addEventListener("submit", (event) => { event.preventDefault(); const key = $("dialog-date-value").value; const leave = $("leave-type").value; const commission = $("commission").checked; shifts[key] = { start: $("start-time").value, end: $("end-time").value, leave: commission ? "" : leave, commission }; saveShifts(); $("shift-dialog").close(); render(); showToast("Turno guardado"); });
+$("import-input").addEventListener("change", (event) => { const file = event.target.files[0]; if (!file) return; const reader = new FileReader(); reader.onload = () => { try { const data = JSON.parse(reader.result); (data.shifts || []).forEach((shift) => { shifts[shift.date] = { start: shift.start || "", end: shift.end || "", off: Boolean(shift.off), leave: shift.leave || "", commission: Boolean(shift.commission), authorizedEarlyDeparture: Boolean(shift.authorizedEarlyDeparture), note: shift.note || "" }; }); if (/^\d{4}-\d{2}$/.test(data.month)) { const [year, month] = data.month.split("-").map(Number); activeMonth = new Date(year, month - 1, 1); } saveShifts(); render(); showToast("Registros importados correctamente"); } catch { showToast("No se pudo leer el archivo JSON"); } }; reader.readAsText(file); event.target.value = ""; });
+$("shift-form").addEventListener("submit", (event) => { event.preventDefault(); const key = $("dialog-date-value").value; const leave = $("leave-type").value; const commission = $("commission").checked; const authorizedEarlyDeparture = $("authorized-early-departure").checked; shifts[key] = { start: $("start-time").value, end: $("end-time").value, leave: commission ? "" : leave, commission, authorizedEarlyDeparture: commission || leave ? false : authorizedEarlyDeparture }; saveShifts(); $("shift-dialog").close(); render(); showToast("Turno guardado"); });
 $("clear-shift").addEventListener("click", () => { if (selectedDate) delete shifts[dateKey(selectedDate)]; saveShifts(); $("shift-dialog").close(); render(); showToast("Registro borrado"); });
 render();

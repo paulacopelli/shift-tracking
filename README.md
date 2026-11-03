@@ -9,6 +9,7 @@ Calculadora web estática para registrar turnos y controlar el cumplimiento de u
 - Sábados y domingos aparecen automáticamente como libres, pero pueden editarse para registrar una jornada excepcional.
 - Registro de licencia por día entero, sólo mañana o sólo tarde; cada media jornada computa la mitad de la jornada esperada.
 - Registro de comisión de servicio: el día se considera cubierto, pero no se contabiliza como horas efectivamente trabajadas.
+- Registro de salida anticipada autorizada, que completa la jornada esperada sin generar descuento.
 - Balance semanal y mensual, horas extra no remuneradas y alerta de descuento desde 59 minutos faltantes.
 - Persistencia automática en `localStorage` del navegador.
 - Exportación mensual en `JSON` (para versionar en GitHub) y `CSV` (compatible con Excel).
