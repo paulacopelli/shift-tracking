@@ -152,7 +152,15 @@
         <label>Ingreso<input id="start-time" type="time" required></label>
         <label>Salida<input id="end-time" type="time" required></label>
       </div>
-      <label class="checkbox-label"><input id="day-off" type="checkbox"> Día libre / no trabajé</label>
+      <label class="select-label">Licencia solicitada
+        <select id="leave-type">
+          <option value="">No corresponde</option>
+          <option value="full">Día entero</option>
+          <option value="morning">Sólo la mañana</option>
+          <option value="afternoon">Sólo la tarde</option>
+        </select>
+      </label>
+      <label class="checkbox-label"><input id="commission" type="checkbox"> Comisión de servicio (viaje de trabajo)</label>
       <div class="dialog-actions">
         <button class="button button-ghost" id="clear-shift" type="button">Borrar registro</button>
         <button class="button button-dark" value="save" type="submit">Guardar turno</button>
