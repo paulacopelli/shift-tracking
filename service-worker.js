@@ -1,4 +1,4 @@
-const CACHE_NAME = "turnario-v2";
+const CACHE_NAME = "turnario-v3";
 const APP_ASSETS = [
   "./",
   "./index.html",
