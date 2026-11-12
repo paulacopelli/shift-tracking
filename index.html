@@ -73,13 +73,13 @@
           <div class="stat-icon muted">↗</div>
           <p>Horas extra</p>
           <strong id="overtime-hours">00:00</strong>
-          <span>No remuneradas</span>
+          <span>Saldo neto semanal · no remuneradas</span>
         </article>
         <article class="stat-card stat-card-warning">
           <div class="stat-icon">!</div>
           <p>Descuento estimado</p>
           <strong id="deduction-days">0 min</strong>
-          <span id="deduction-caption">a partir de 59 min faltantes</span>
+          <span id="deduction-caption">faltantes netos del mes desde 59 min</span>
         </article>
       </section>
 
@@ -110,17 +110,33 @@
           <div class="panel-heading">
             <div>
               <p class="eyebrow">Seguimiento</p>
-              <h2>Esta semana</h2>
+              <h2 id="week-title">Esta semana</h2>
+              <span class="week-range" id="week-range"></span>
             </div>
             <span class="status-pill" id="week-status">Pendiente</span>
           </div>
-          <div class="week-total"><strong id="week-worked">00:00</strong><span>/ 44:00 hs</span></div>
+          <div class="week-navigation">
+            <button class="icon-button" id="previous-week" type="button" aria-label="Semana anterior">←</button>
+            <button class="button button-ghost" id="current-week" type="button">Esta semana</button>
+            <button class="icon-button" id="next-week" type="button" aria-label="Semana siguiente">→</button>
+          </div>
+          <div class="week-total"><strong id="week-worked">00:00</strong><span id="week-target">/ 44:00 hs</span></div>
           <div class="progress-track"><div class="progress-bar" id="week-progress"></div></div>
           <p class="helper" id="week-helper">Registra tus turnos para ver el balance.</p>
           <div class="week-days" id="week-days"></div>
+          <div class="recovery-controls">
+            <button class="button button-ghost" id="toggle-recovery" type="button" aria-pressed="false">Activar recuperación</button>
+            <label for="recovery-goal">Día libre a recuperar</label>
+            <select id="recovery-goal">
+              <option value="540">9 h · lunes a jueves</option>
+              <option value="480">8 h · viernes</option>
+            </select>
+            <p id="recovery-progress" aria-live="polite">00:00 recuperadas de 09:00.</p>
+            <small>Al activar una semana, el objetivo suma 30 min por día hábil, hasta completar el día.</small>
+          </div>
           <div class="rule-note">
             <span>i</span>
-            <p><strong>Regla semanal</strong><br>44 horas de lunes a viernes. Las horas extra no se pagan.</p>
+            <p><strong>Regla semanal</strong><br>44 horas de lunes a viernes. Las horas extra no se pagan; el modo recuperación agrega tiempo al objetivo.</p>
           </div>
         </aside>
       </section>

@@ -12,9 +12,10 @@ Calculadora web estática para registrar turnos y controlar el cumplimiento de u
 - Registro de salida anticipada autorizada, que completa la jornada esperada sin generar descuento.
 - Registro manual de feriados, que completa la jornada esperada sin sumar horas trabajadas ni generar descuento.
 - Botón para agregar un día online, que completa la jornada esperada aunque no exista marcación.
-- Balance semanal y mensual, horas extra no remuneradas y alerta de descuento desde 59 minutos faltantes.
+- Balance semanal navegable, balance mensual, horas extra no remuneradas y alerta de descuento desde 59 minutos faltantes.
 - El resumen mensual sólo incluye fechas del mes seleccionado; el resumen semanal conserva la semana completa aunque cruce de mes.
-- El descuento estimado muestra los minutos faltantes de las jornadas con 59 minutos o más de déficit.
+- Los excedentes de una semana compensan primero los faltantes registrados de esa misma semana. Luego, los faltantes netos se acumulan por mes y se muestran como descuento estimado al alcanzar 59 minutos.
+- El modo de recuperación semanal agrega 30 minutos por día hábil al objetivo, hasta acumular las 8 horas de un viernes o las 9 horas de otro día. La semana y la duración elegida se conservan en el respaldo JSON.
 - Persistencia automática en `localStorage` del navegador.
 - Exportación mensual en `JSON` (para versionar en GitHub) y `CSV` (compatible con Excel).
 - Importación de un JSON previamente exportado para continuar el registro en otro dispositivo.
@@ -43,5 +44,6 @@ El almacenamiento local de cada navegador es independiente: registrar un turno e
 - Objetivo diario de referencia: 9 horas de lunes a jueves y 8 horas el viernes.
 - Los sábados y domingos no agregan horas esperadas.
 - Las licencias y comisiones computan para el cumplimiento semanal, sin sumarse a las horas efectivamente trabajadas.
-- Un faltante de 59 minutos o más se marca como descuento estimado.
+- Los faltantes de jornadas registradas se compensan con los excedentes registrados de su misma semana; los faltantes netos restantes se acumulan por mes. Se muestran desde 59 minutos, por lo que déficits menores pueden sumarse entre sí durante el mes.
+- En una semana marcada para recuperar un feriado, el objetivo aumenta 30 minutos por día hábil. Los extras netos de las semanas marcadas se acumulan hasta completar 8 horas (viernes) o 9 horas (otro día).
 - Las horas por encima del objetivo se muestran como extra, pero no se agregan a una remuneración.
